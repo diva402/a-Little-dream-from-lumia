@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,16 +17,11 @@
       overflow: hidden;
       margin: 0;
     }
+
     #container {
       text-align: center;
     }
-    #symbols {
-      white-space: pre-wrap;
-      font-size: 1.2rem;
-      line-height: 1.5;
-      margin-top: 20px;
-      max-width: 90vw;
-    }
+
     input {
       padding: 10px;
       font-size: 1.1rem;
@@ -35,6 +31,7 @@
       text-align: center;
       outline: none;
     }
+
     button {
       padding: 10px 20px;
       margin-left: 10px;
@@ -43,12 +40,47 @@
       color: white;
       cursor: pointer;
     }
-    .animated {
-      animation: flicker 1.2s infinite alternate;
+
+    #symbols {
+      white-space: pre-wrap;
+      font-size: 1.2rem;
+      line-height: 1.5;
+      margin-top: 20px;
+      max-width: 90vw;
+      display: none;
     }
-    @keyframes flicker {
-      0% { opacity: 0.2; transform: scale(1); }
-      100% { opacity: 1; transform: scale(1.05); }
+
+    .glitch {
+      color: #999;
+      position: relative;
+      display: inline-block;
+      overflow: hidden;
+    }
+
+    .glitch::before {
+      content: attr(data-text);
+      position: absolute;
+      left: 2px;
+      top: 0;
+      color: #f0f;
+      opacity: 0.6;
+      clip-path: inset(0 0 50% 0);
+    }
+
+    .glitch::after {
+      content: attr(data-text);
+      position: absolute;
+      left: -2px;
+      top: 0;
+      color: #0ff;
+      opacity: 0.6;
+      clip-path: inset(50% 0 0 0);
+    }
+
+    .blurred {
+      filter: blur(4px);
+      display: inline-block;
+      color: #aaa;
     }
   </style>
 </head>
@@ -58,53 +90,57 @@
     <button onclick="checkPassword()">Submit</button>
     <div id="symbols"></div>
   </div>
-  <audio id="laugh" src="https://cdn.pixabay.com/audio/2022/03/15/audio_f30cbd0b8b.mp3"></audio>
+
   <script>
-    const hebrewText = "האם לומיה עדיין בחיים?"; // Apakah Lumia masih hidup?const symbolsSet = [
-  "⛧", "𓆩", "𓂀", "✶", "⚛︎", "꧁", "♱", "𖤐", "⟁", "𝕏", "𐌿", "⟆", "⟟", "⍝", "𓁹", "𝓧", "☠︎", "♾️"
-];
+    const hebrewText = "האם לומיה עדיין בחיים?"; // Apakah Lumia masih hidup?
 
-function getRandomSymbol(animated = false) {
-  const s = symbolsSet[Math.floor(Math.random() * symbolsSet.length)];
-  if (animated && Math.random() < 0.2) {
-    return `<span class='animated'>${s}</span>`;
-  }
-  return s;
-}
+    const symbolsSet = [
+      "⛧", "𓆩", "𓂀", "✶", "⚛︎", "꧁", "♱", "𖤐", "⟁", "𝕏", "𐌿", "⟆", "⟟", "⍝", "𓁹", "𝓧", "☠︎", "♾️"
+    ];
 
-function generateSymbolWall() {
-  let output = "";
-  for (let i = 0; i < 40; i++) {
-    for (let j = 0; j < 60; j++) {
-      const animated = Math.random() < 0.2; // 20% chance animated
-      output += getRandomSymbol(animated);
+    function getRandomSymbol() {
+      return symbolsSet[Math.floor(Math.random() * symbolsSet.length)];
     }
-    output += "\n";
-  }
-  output += `\n\n<center style='font-size: 2rem;'>${hebrewText}</center>\n\n`;
-  for (let i = 0; i < 20; i++) {
-    for (let j = 0; j < 60; j++) {
-      const animated = Math.random() < 0.2;
-      output += getRandomSymbol(animated);
+
+    function generateSymbolWall() {
+      let output = "";
+      for (let i = 0; i < 20; i++) {
+        for (let j = 0; j < 60; j++) {
+          const symbol = getRandomSymbol();
+          output += symbol;
+        }
+        output += "\n";
+      }
+
+      output += `\n\n<center class="glitch" data-text="${hebrewText}">${hebrewText}</center>\n\n`;
+
+      for (let i = 0; i < 10; i++) {
+        let line = "";
+        for (let j = 0; j < 60; j++) {
+          if (Math.random() < 0.1) {
+            // Blurred secret message
+            line += `<span class='blurred'>${getRandomSymbol()}</span>`;
+          } else {
+            line += getRandomSymbol();
+          }
+        }
+        output += line + "\n";
+      }
+      return output;
     }
-    output += "\n";
-  }
-  return output;
-}
 
-function checkPassword() {
-  const input = document.getElementById("password").value;
-  if (input === "2006") {
-    document.getElementById("laugh").play();
-    const wall = generateSymbolWall();
-    document.getElementById("symbols").innerHTML = wall;
-    document.getElementById("password").style.display = "none";
-    document.querySelector("button").style.display = "none";
-  } else {
-    alert("Wrong password.");
-  }
-}
-
+    function checkPassword() {
+      const input = document.getElementById("password").value;
+      if (input === "2006") {
+        const wall = generateSymbolWall();
+        document.getElementById("symbols").innerHTML = wall;
+        document.getElementById("symbols").style.display = "block";
+        document.getElementById("password").style.display = "none";
+        document.querySelector("button").style.display = "none";
+      } else {
+        alert("Wrong password.");
+      }
+    }
   </script>
 </body>
 </html>
